@@ -7,7 +7,7 @@
 ## Overview
 
 - **Duration:** 2.5 - 3 hours  
-- **Format:** Instructor-led, challenge-based workshop  
+- **Format:** Instructor-led, guided hands-on workshop  
 - **Difficulty:** 🟡 Intermediate to 🔴 Advanced  
 - **Audience:** Developers, Security Engineers, Tech Leads, Reviewers  
 - **Focus:** Using AI agents to perform systematic security analysis and code reviews
@@ -202,12 +202,89 @@ Scope → Scan → Review → Remediate → Verify
 
 **Goal:** Establish clear boundaries for security and code review.
 
-**Participants:**
-- Review the target application architecture
-- Use Copilot Chat to:
-  - Identify high-risk areas (auth, data handling, APIs)
-  - Prioritize components for review
-  - Define verification objectives
+---
+
+#### 📖 Step-by-Step Walkthrough
+
+**Step 1: Review application architecture** (3 min)
+```
+Open target-app/ and identify:
+- Entry points (APIs, web routes, CLI)
+- Data flows (user input → storage → output)
+- Critical components (auth, payment, admin)
+```
+
+**Step 2: Identify high-risk areas** (5 min)
+
+Open Copilot Chat:
+
+```
+Analyze @target-app and identify high-risk security areas:
+
+1. Authentication and session management
+2. Data input/output handlers
+3. Database operations
+4. External API integrations
+5. Admin/privileged functions
+
+For each area, rate risk as: Critical / High / Medium / Low
+Explain why.
+```
+
+✅ **Expected Output:** Risk-rated list of 5+ components.
+
+**Step 3: Create threat model** (7 min)
+
+Use this prompt:
+
+```
+Create a STRIDE threat model for @target-app:
+
+- Spoofing: Identity impersonation risks
+- Tampering: Data modification risks
+- Repudiation: Audit trail gaps
+- Information Disclosure: Data leakage risks
+- Denial of Service: Availability threats
+- Elevation of Privilege: Authorization bypass
+
+For each threat type, identify:
+- Where it applies
+- Attack scenario
+- Potential impact
+```
+
+**Step 4: Map trust boundaries** (3 min)
+
+Use this prompt:
+
+```
+Identify trust boundaries in @target-app:
+
+1. User → Application (input validation boundary)
+2. Application → Database (query boundary)
+3. Application → External APIs (integration boundary)
+4. Admin vs User access (authorization boundary)
+
+What data crosses each boundary? What validation happens?
+```
+
+**Step 5: Document scope** (2 min)
+- Copy findings to `verification/security-scope.md`
+- Prioritize components for review
+- Note exclusions
+
+---
+
+#### 💡 Tips & Hints
+
+| Challenge | Hint |
+|-----------|------|
+| 1.1 (high-risk) | Think: auth, input, data, admin, integrations |
+| 1.2 (threat model) | Use STRIDE: S-T-R-I-D-E |
+| 1.3 (data flows) | Follow user input from entry to storage to output |
+| 1.4 (attack vectors) | Think like an attacker: "How would I break this?" |
+
+---
 
 **Artifact Updated:** `verification/security-scope.md`
 
@@ -228,11 +305,110 @@ Scope → Scan → Review → Remediate → Verify
 
 **Goal:** Build a purpose-driven agent for vulnerability detection.
 
-**Participants define an agent that:**
-- Checks for OWASP Top 10 vulnerabilities
-- Analyzes authentication and session management
-- Identifies data exposure and injection risks
-- Documents findings with severity and context
+---
+
+#### 📖 Step-by-Step Walkthrough
+
+**Step 1: Create agent file** (2 min)
+```
+Create agents/security-scanner-agent.md
+```
+
+**Step 2: Define agent identity** (5 min)
+
+Add to your agent file:
+
+```markdown
+# Security Scanner Agent
+
+## Identity
+You are a security analyst specializing in application security.
+You find vulnerabilities systematically and document them clearly.
+
+## Your Approach
+1. Scan methodically – don’t skip areas
+2. Assume inputs are malicious until proven otherwise
+3. Document every finding with evidence
+4. Rate severity based on exploitability and impact
+5. Suggest remediations, not just problems
+
+## You Must NOT
+- Ignore "minor" issues – document everything
+- Make assumptions without checking code
+- Report findings without severity and location
+```
+
+**Step 3: Add OWASP detection rules** (10 min)
+
+Use Copilot to generate rules:
+
+```
+Generate detection rules for these OWASP Top 10 categories:
+
+1. Injection (SQL, XSS, Command)
+2. Broken Authentication
+3. Sensitive Data Exposure
+4. Broken Access Control
+5. Security Misconfiguration
+
+For each category:
+- Code patterns to look for
+- Example vulnerable code
+- Why it’s dangerous
+- How to fix it
+```
+
+✅ **Expected Output:** Detection rules for 5+ OWASP categories.
+
+**Step 4: Add severity classification** (5 min)
+
+Add to your agent:
+
+```markdown
+## Severity Classification
+
+| Severity | Criteria | Example |
+|----------|----------|----------|
+| CRITICAL | RCE, data breach, auth bypass | SQL injection in login |
+| HIGH | Significant data exposure, escalation | IDOR, XSS with session theft |
+| MEDIUM | Limited exploitation, requires auth | Self-XSS, verbose errors |
+| LOW | Informational, best practice | Missing headers, weak algo |
+
+## Finding Format
+```
+**[SEVERITY] Finding Title**
+- Location: file:line
+- Description: What’s wrong
+- Evidence: Code snippet
+- Impact: What attacker can do
+- Fix: How to remediate
+```
+```
+
+**Step 5: Add false positive filtering** (3 min)
+
+```markdown
+## False Positive Checks
+
+Before reporting, verify:
+1. Is the vulnerable code actually reachable?
+2. Is there validation elsewhere that mitigates?
+3. Is this intentional test/sample code?
+4. Does the context change the risk?
+```
+
+---
+
+#### 💡 Tips & Hints
+
+| Challenge | Hint |
+|-----------|------|
+| 2.1 (5+ OWASP) | Injection, AuthN, Data, Access, Config |
+| 2.2 (severity) | Impact × Exploitability = Severity |
+| 2.3 (false positives) | "Is this actually exploitable?" |
+| 2.4 (CWE mapping) | Reference cwe.mitre.org |
+
+---
 
 **Agent Defined In:** `agents/security-scanner-agent.md`
 
@@ -253,19 +429,95 @@ Scope → Scan → Review → Remediate → Verify
 
 **Goal:** Use the security agent to identify vulnerabilities.
 
-**Participants:**
-- Use the Security Scanner Agent to analyze:
-  - Authentication flows
-  - Input validation and sanitization
-  - Data handling and storage
-  - API security
+---
 
-**Vulnerability Categories Covered:**
-- Injection (SQL, Command, XSS)
-- Broken Authentication
-- Sensitive Data Exposure
-- Security Misconfiguration
-- Insecure Direct Object References
+#### 📖 Step-by-Step Walkthrough
+
+**Step 1: Start with authentication** (10 min)
+
+Open Copilot Chat with your agent and auth files:
+
+```
+Using @security-scanner-agent.md, analyze @target-app/src/auth/ for:
+
+1. SQL injection in login/registration
+2. Weak password handling (plain text, weak hash)
+3. Session management issues
+4. Token vulnerabilities (JWT, session)
+5. Missing rate limiting
+
+Document each finding with severity, location, and evidence.
+```
+
+✅ **Expected Output:** 2-3 authentication-related findings.
+
+**Step 2: Check input validation** (8 min)
+
+Use this prompt:
+
+```
+Analyze @target-app/src/api/ for injection vulnerabilities:
+
+1. SQL injection (string concatenation in queries)
+2. Command injection (exec, spawn with user input)
+3. XSS (user input reflected without encoding)
+4. Path traversal (file paths from user input)
+5. LDAP/XML injection
+
+For each, show the vulnerable code and explain exploitation.
+```
+
+**Step 3: Find data exposure** (8 min)
+
+Use this prompt:
+
+```
+Analyze @target-app for sensitive data exposure:
+
+1. Passwords or tokens in logs
+2. Sensitive data in URLs (GET parameters)
+3. API responses with excessive data
+4. Hardcoded secrets in code
+5. Insecure data storage
+
+Check: logs, error messages, API responses, config files.
+```
+
+**Step 4: Check configurations** (5 min)
+
+Use CLI for quick checks:
+
+```bash
+gh copilot explain "security issues in this config:
+$(cat target-app/config/*.json)"
+```
+
+**Step 5: Document findings** (4 min)
+- Copy all findings to `verification/findings.md`
+- Organize by severity (Critical first)
+- Note the evidence for each
+
+---
+
+#### 💡 Tips & Hints
+
+| Challenge | Hint |
+|-----------|------|
+| 3.1 (injection) | Search for: exec, query, eval + user input |
+| 3.2 (auth flaws) | Check password storage, session handling |
+| 3.3 (data exposure) | Grep for: console.log, password, secret |
+| 3.4 (misconfig) | Check: debug mode, default creds, CORS |
+| 3.5 (business logic) | What if user manipulates hidden fields? |
+
+---
+
+#### ⚠️ Common Pitfalls
+
+- ❌ **Missing context:** Finding in dead code isn’t exploitable
+- ❌ **Over-reporting:** One root cause, multiple symptoms
+- ❌ **Severity inflation:** Not every finding is “Critical”
+
+---
 
 **Artifact Updated:** `verification/findings.md`
 
@@ -287,12 +539,89 @@ Scope → Scan → Review → Remediate → Verify
 
 **Goal:** Perform code review beyond security vulnerabilities.
 
-**Participants:**
-- Use the Code Review Agent to:
-  - Check code quality and maintainability
-  - Identify error handling gaps
-  - Verify logging and monitoring practices
-  - Assess adherence to secure coding patterns
+---
+
+#### 📖 Step-by-Step Walkthrough
+
+**Step 1: Create review checklist** (3 min)
+```
+Open verification/review-checklist.md and add:
+- Component name
+- Files reviewed
+- Review date
+```
+
+**Step 2: Review error handling** (7 min)
+
+Open Copilot Chat:
+
+```
+Review error handling in @target-app:
+
+1. Are there catch blocks that swallow errors silently?
+2. Do error messages expose stack traces to users?
+3. Are errors logged with useful context?
+4. Is there a global error handler?
+5. Are database errors exposed to clients?
+
+For each issue, note the file, line, and concern.
+```
+
+✅ **Expected Output:** Error handling review with 2-3 findings.
+
+**Step 3: Review logging practices** (7 min)
+
+Use this prompt:
+
+```
+Review logging in @target-app for security issues:
+
+1. Passwords logged in plain text
+2. Session tokens in logs
+3. PII (email, phone, SSN) in logs
+4. Credit card numbers or financial data
+5. API keys or secrets in logs
+
+Also check: Are security events logged? (Failed logins, access denied)
+```
+
+**Step 4: Check input validation** (5 min)
+
+Use this prompt:
+
+```
+Review input validation patterns:
+
+1. Is validation done server-side (not just client)?
+2. Are all API inputs validated?
+3. Is validation centralized or scattered?
+4. Are validation errors helpful but not revealing?
+5. Is there a whitelist or blacklist approach?
+
+Identify gaps and inconsistencies.
+```
+
+**Step 5: Check dependencies** (3 min)
+
+Use CLI:
+
+```bash
+gh copilot explain "check these dependencies for known vulnerabilities:
+$(cat target-app/package.json)"
+```
+
+---
+
+#### 💡 Tips & Hints
+
+| Challenge | Hint |
+|-----------|------|
+| 4.1 (checklist) | Use the appendix checklist as starting point |
+| 4.2 (error handling) | Search for: catch, error, exception |
+| 4.3 (logging) | Search for: log, console, logger + sensitive terms |
+| 4.4 (dependencies) | Check npm audit or snyk for CVEs |
+
+---
 
 **Review Dimensions:**
 - Input validation
@@ -320,12 +649,93 @@ Scope → Scan → Review → Remediate → Verify
 
 **Goal:** Create actionable remediation guidance for findings.
 
-**Participants:**
-- Use the Remediation Agent to:
-  - Generate secure code alternatives
-  - Prioritize fixes by risk and effort
-  - Provide implementation guidance
-  - Identify quick wins vs. longer-term improvements
+---
+
+#### 📖 Step-by-Step Walkthrough
+
+**Step 1: Prioritize findings** (5 min)
+
+Open Copilot Chat with your findings:
+
+```
+Create a remediation priority matrix for @findings.md:
+
+| Finding | Severity | Effort | Priority |
+|---------|----------|--------|---------|
+
+Priority formula:
+- Critical + Low Effort = Fix Immediately
+- Critical + High Effort = Fix Soon, Plan Carefully
+- Low + Low Effort = Quick Win
+- Low + High Effort = Backlog
+```
+
+✅ **Expected Output:** Prioritized matrix of all findings.
+
+**Step 2: Generate fix for critical vuln** (8 min)
+
+For your highest-priority critical finding:
+
+```
+Generate a secure fix for this vulnerability:
+
+**Finding:** [paste from findings.md]
+
+Provide:
+1. The secure code replacement
+2. Explanation of why this is secure
+3. Any additional hardening to add
+4. Tests to verify the fix works
+```
+
+**Step 3: Generate fixes for other findings** (7 min)
+
+Use this prompt:
+
+```
+For each finding in @findings.md, provide:
+
+1. Minimal code change to fix
+2. Secure coding pattern to follow
+3. Related areas to check
+4. Verification criteria
+
+Format as a remediation checklist.
+```
+
+**Step 4: Create secure patterns library** (3 min)
+
+Use this prompt:
+
+```
+Based on the vulnerabilities found, create a secure patterns library:
+
+1. Secure SQL query pattern
+2. Secure authentication pattern
+3. Secure input validation pattern
+4. Secure logging pattern
+5. Secure error handling pattern
+
+Provide code examples for each.
+```
+
+**Step 5: Document remediation plan** (2 min)
+- Copy to `verification/remediation-plan.md`
+- Order by priority
+- Assign owners if working in team
+
+---
+
+#### 💡 Tips & Hints
+
+| Challenge | Hint |
+|-----------|------|
+| 5.1 (critical fix) | Use parameterized queries for SQL injection |
+| 5.2 (priority matrix) | Severity × Exploitability ÷ Effort = Priority |
+| 5.3 (auth fix) | Use bcrypt for passwords, secure session config |
+| 5.4 (patterns library) | Reusable templates for common security patterns |
+
+---
 
 **Artifact Updated:** `verification/remediation-plan.md`
 
@@ -346,11 +756,98 @@ Scope → Scan → Review → Remediate → Verify
 
 **Goal:** Validate remediation and document verification evidence.
 
-**Participants:**
-- Use the Verification Agent to:
-  - Confirm findings are addressed
-  - Check for regression risks
-  - Document verification evidence
+---
+
+#### 📖 Step-by-Step Walkthrough
+
+**Step 1: Create verification checklist** (2 min)
+```
+For each remediated finding, create:
+- Finding ID
+- Original issue
+- Fix applied
+- Verification status: ⬜ Pending / ✅ Verified / ❌ Failed
+```
+
+**Step 2: Verify critical fixes** (7 min)
+
+Open Copilot Chat:
+
+```
+Verify this security fix:
+
+**Original Finding:** [paste]
+**Applied Fix:** [paste code change]
+
+Confirm:
+1. Does this fix address the root cause?
+2. Is the new code secure?
+3. Are there edge cases this misses?
+4. Could this introduce new vulnerabilities?
+5. Does this follow secure coding patterns?
+
+Verdict: PASS / FAIL with explanation.
+```
+
+✅ **Expected Output:** Verification verdict for each critical finding.
+
+**Step 3: Check for regressions** (3 min)
+
+Use this prompt:
+
+```
+Analyze the remediation changes for regression risks:
+
+[paste diff or changed files]
+
+Check:
+1. Functionality still works as expected?
+2. Performance not degraded?
+3. Other code that depends on changed code?
+4. Tests still pass?
+```
+
+**Step 4: Create before/after comparison** (3 min)
+
+Use this prompt:
+
+```
+Create a before/after security comparison:
+
+| Category | Before | After | Status |
+|----------|--------|-------|--------|
+| SQL Injection | 3 vulnerabilities | 0 | ✅ Fixed |
+| XSS | ... | ... | ... |
+
+Summarize the security posture improvement.
+```
+
+---
+
+#### 💡 Tips & Hints
+
+| Challenge | Hint |
+|-----------|------|
+| 6.1 (verify all) | Walk through each fix with test inputs |
+| 6.2 (before/after) | Count vulnerabilities by category |
+| 6.3 (regression tests) | Create tests that would catch if vuln returns |
+
+---
+
+#### ⚠️ Common Pitfalls
+
+- ❌ **Verifying without testing:** Always test with real inputs
+- ❌ **Missing edge cases:** Test boundary conditions
+- ❌ **Sign-off without evidence:** Document how you verified
+
+---
+
+**Discussion:**
+- When is "good enough" good enough?
+- Balancing security with delivery
+- Continuous verification in CI/CD
+
+**✅ Outcome:** Verification evidence and sign-off criteria.
 
 #### 🎯 Challenges
 

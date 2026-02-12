@@ -7,7 +7,7 @@
 ## Overview
 
 - **Duration:** 2.5 - 3 hours  
-- **Format:** Instructor-led, challenge-based workshop  
+- **Format:** Instructor-led, guided hands-on workshop  
 - **Difficulty:** 🟡 Intermediate to 🔴 Advanced  
 - **Audience:** Developers, Tech Leads, Architects  
 - **Focus:** Using custom AI agents to modernize existing .NET and Java applications
@@ -157,13 +157,94 @@ Analyze → Define Goals → Create Agent → Modernize → Validate
 
 **Goal:** Build a shared understanding of the current state.
 
-**Participants:**
+---
 
-- Review the legacy .NET/Java application
-- Use Copilot Chat to:
-  - Identify architectural smells
-  - Highlight outdated patterns
-  - Surface technical debt
+#### 📖 Step-by-Step Walkthrough
+
+**Step 1: Explore the legacy codebase** (3 min)
+```
+Open the legacy-app/ folder and review:
+- Project structure and organization
+- Key entry points (Program.cs / Application.java)
+- Configuration files
+```
+
+**Step 2: Identify architectural smells** (8 min)
+
+Open Copilot Chat and add the legacy code files, then use this prompt:
+
+```
+Analyze this legacy [.NET/.Java] application and identify architectural smells:
+
+1. God classes (classes doing too much)
+2. Tight coupling between components
+3. Missing abstraction layers
+4. Hardcoded values and magic strings
+5. Violation of SOLID principles
+
+For each smell, provide:
+- Location (file/class)
+- Why it's a problem
+- Modernization priority (High/Medium/Low)
+```
+
+✅ **Expected Output:** A prioritized list of architectural issues.
+
+**Step 3: Identify deprecated patterns** (5 min)
+
+Use this follow-up prompt:
+
+```
+Identify deprecated or outdated patterns in this codebase:
+
+1. Deprecated .NET/Java APIs being used
+2. Old authentication patterns
+3. Legacy data access patterns (ADO.NET, raw JDBC)
+4. Outdated dependency injection approaches
+5. Obsolete configuration methods
+
+For each, suggest the modern replacement.
+```
+
+**Step 4: Create technical debt heatmap** (5 min)
+
+Use this prompt:
+
+```
+Create a technical debt heatmap for this codebase:
+
+| Component/File | Debt Level | Key Issues | Effort to Fix |
+
+Debt Levels: 🔴 High | 🟡 Medium | 🟢 Low
+
+Focus on areas that will block modernization.
+```
+
+**Step 5: Document findings** (4 min)
+- Copy analysis to `modernization/current-state.md`
+- Highlight the top 5 issues to address
+- Note dependencies between issues
+
+---
+
+#### 💡 Tips & Hints
+
+| Challenge | Hint |
+|-----------|------|
+| 1.1 (architectural smells) | Look for classes >500 lines, methods >50 lines |
+| 1.2 (deprecated APIs) | Search for `[Obsolete]` or `@Deprecated` annotations |
+| 1.3 (debt heatmap) | Focus on code that's touched frequently |
+| 1.4 (complexity score) | Consider: coupling, test coverage, documentation |
+
+---
+
+#### ⚠️ Common Pitfalls
+
+- ❌ **Boiling the ocean:** Don't try to fix everything - prioritize
+- ❌ **Missing context:** Some "smells" might be intentional - ask why
+- ❌ **Ignoring tests:** Legacy code without tests is higher risk
+
+---
 
 **Artifacts updated:**
 
@@ -186,11 +267,86 @@ Analyze → Define Goals → Create Agent → Modernize → Validate
 
 **Goal:** Make modernization intent explicit.
 
-**Participants:**
+---
 
-- Define target outcomes (e.g., .NET 8, Java 17, architecture style)
-- Capture constraints (time, scope, dependencies)
-- Clarify what will *not* be modernized
+#### 📖 Step-by-Step Walkthrough
+
+**Step 1: Define target state** (5 min)
+
+Open Copilot Chat with your current-state analysis:
+
+```
+Based on @current-state.md, help me define a target modernization state:
+
+1. Target framework version (.NET 8 / Java 17+)
+2. Target architecture style (clean architecture, CQRS, etc.)
+3. Target patterns (dependency injection, async/await, etc.)
+4. Target infrastructure (containerized, cloud-native, etc.)
+
+Be specific and measurable.
+```
+
+✅ **Expected Output:** A clear vision of the modernized application.
+
+**Step 2: Define success criteria** (5 min)
+
+Use this prompt:
+
+```
+Define measurable success criteria for this modernization:
+
+1. Performance targets (response time, throughput)
+2. Code quality metrics (coverage, complexity)
+3. Security requirements (OWASP compliance)
+4. Operational requirements (deployment frequency, rollback time)
+
+Each criterion should be testable.
+```
+
+**Step 3: Identify constraints** (5 min)
+
+Use this prompt:
+
+```
+Identify constraints for this modernization project:
+
+1. Timeline constraints (deadlines, milestones)
+2. Budget constraints (team size, tools)
+3. Technical constraints (must-keep dependencies, integrations)
+4. Business constraints (zero downtime, backward compatibility)
+
+For each, note the consequence if violated.
+```
+
+**Step 4: Create phased roadmap** (5 min)
+
+Use this prompt:
+
+```
+Create a phased modernization roadmap:
+
+Phase 1: Foundation (weeks 1-2)
+Phase 2: Core Migration (weeks 3-6)
+Phase 3: Enhancement (weeks 7-8)
+
+For each phase:
+- What components to modernize
+- Success criteria to verify
+- Rollback strategy if issues arise
+```
+
+---
+
+#### 💡 Tips & Hints
+
+| Challenge | Hint |
+|-----------|------|
+| 2.1 (success criteria) | Use SMART: Specific, Measurable, Achievable, Relevant, Time-bound |
+| 2.2 (constraints) | Interview stakeholders - hidden constraints exist |
+| 2.3 (roadmap) | Start with highest-risk, highest-value components |
+| 2.4 (rollback strategy) | Feature flags enable safe rollback |
+
+---
 
 **Artifacts updated:**
 
@@ -214,15 +370,104 @@ Analyze → Define Goals → Create Agent → Modernize → Validate
 
 **Goal:** Build a purpose-driven agent for modernization.
 
-**Participants:**
+---
 
-- Define agent responsibilities:
-  - Code analysis
-  - Refactoring guidance
-  - Pattern enforcement
-- Specify tone, constraints, and success criteria
-- Store agent definition in:
-  - `agents/modernization-agent.md`
+#### 📖 Step-by-Step Walkthrough
+
+**Step 1: Define agent identity and role** (5 min)
+
+Create `agents/modernization-agent.md` with this structure:
+
+```markdown
+# Modernization Agent
+
+## Identity
+You are a [.NET/.Java] modernization expert helping migrate legacy code to modern patterns.
+
+## Your Responsibilities
+1. Analyze legacy code and suggest modern equivalents
+2. Apply consistent modernization rules
+3. Preserve business logic exactly
+4. Explain reasoning for every change
+
+## You Should NOT
+1. Change business logic
+2. Skip validation of transformations
+3. Introduce new dependencies without approval
+```
+
+**Step 2: Define modernization rules** (10 min)
+
+Add specific rules to your agent:
+
+```
+Add these modernization rules to the agent definition:
+
+## Transformation Rules
+
+### .NET Rules:
+1. Convert synchronous methods to async/await
+2. Replace HttpWebRequest with HttpClient
+3. Convert Entity Framework 6 to EF Core
+4. Replace web.config with appsettings.json
+5. Update to nullable reference types
+
+### Java Rules:
+1. Migrate from Java 8 streams to modern patterns
+2. Replace Date/Calendar with java.time
+3. Update Spring Boot 2.x to 3.x patterns
+4. Convert to records where appropriate
+5. Add sealed classes where beneficial
+```
+
+**Step 3: Add validation checklist** (8 min)
+
+Use this prompt:
+
+```
+Create a self-validation checklist for the modernization agent:
+
+Before returning modernized code, verify:
+1. [ ] Business logic unchanged (input → output same)
+2. [ ] All imports/using statements updated
+3. [ ] No deprecated APIs remaining
+4. [ ] Error handling preserved or improved
+5. [ ] Performance not degraded
+
+Format as markdown checklist.
+```
+
+**Step 4: Add examples** (7 min)
+
+Add before/after examples to your agent:
+
+```
+Provide 3 before/after code examples for the agent:
+
+Example 1: Async conversion
+BEFORE: [legacy sync code]
+AFTER: [modern async code]
+WHY: [explanation]
+
+Include .NET or Java examples based on your target.
+```
+
+---
+
+#### 💡 Tips & Hints
+
+| Challenge | Hint |
+|-----------|------|
+| 3.1 (5+ rules) | Think: data access, HTTP, config, DI, async |
+| 3.2 (error handling) | Include "when in doubt, ask" instructions |
+| 3.3 (framework patterns) | Reference official migration guides |
+| 3.4 (self-validation) | Add checkpoints before and after transformation |
+| 3.5 (versioning) | Include version number and changelog in agent |
+
+---
+
+**Artifact created:**
+- `agents/modernization-agent.md`
 
 #### 🎯 Challenges
 
@@ -241,6 +486,95 @@ Analyze → Define Goals → Create Agent → Modernize → Validate
 ### 5. Lab 4: Apply the Agent to Modernize the Application ⏱️ _40 minutes_
 
 **Goal:** Perform guided modernization using the custom agent.
+
+---
+
+#### 📖 Step-by-Step Walkthrough
+
+**Step 1: Select components to modernize** (3 min)
+```
+Review your current-state.md and select:
+- 2-3 components with HIGH technical debt
+- Components that are relatively isolated
+- Components critical to the application
+```
+
+**Step 2: Modernize first component** (12 min)
+
+Open Copilot Chat with your agent definition and legacy code:
+
+```
+Using the rules in @modernization-agent.md, modernize this service:
+
+@LegacyService.cs (or .java)
+
+Apply these transformations:
+1. Convert to async/await patterns
+2. Update deprecated APIs
+3. Improve error handling
+4. Add proper dependency injection
+
+Show before/after for each change with explanation.
+```
+
+✅ **Expected Output:** Modernized code with inline explanations.
+
+**Step 3: Modernize data access layer** (12 min)
+
+Use this prompt:
+
+```
+Modernize the data access code in @DataRepository.cs:
+
+1. Convert ADO.NET to Entity Framework Core (or JDBC to JPA)
+2. Add async database operations
+3. Implement repository pattern if missing
+4. Add proper connection management
+
+Preserve all existing queries exactly.
+```
+
+**Step 4: Modernize API layer** (10 min)
+
+Use this prompt:
+
+```
+Modernize the API controller @LegacyController.cs:
+
+1. Update to modern [ApiController] patterns
+2. Add proper model binding and validation
+3. Implement consistent error responses
+4. Add swagger/OpenAPI documentation attributes
+
+Maintain backward compatibility with existing clients.
+```
+
+**Step 5: Apply changes to codebase** (3 min)
+- Copy modernized code to `src-modernized/`
+- Preserve original files for comparison
+- Note any manual adjustments needed
+
+---
+
+#### 💡 Tips & Hints
+
+| Challenge | Hint |
+|-----------|------|
+| 4.1 (modernize services) | Start with services that have fewest dependencies |
+| 4.2 (deprecated APIs) | Check Microsoft/Oracle migration guides |
+| 4.3 (async patterns) | Follow "async all the way" principle |
+| 4.4 (DI patterns) | Use constructor injection, avoid service locator |
+| 4.5 (strangler fig) | Keep old API running, gradually route to new |
+
+---
+
+#### ⚠️ Common Pitfalls
+
+- ❌ **Changing business logic:** Modernize the HOW, not the WHAT
+- ❌ **Breaking changes:** Maintain API contracts for existing clients
+- ❌ **Big bang migration:** Do one component at a time
+
+---
 
 **Participants:**
 

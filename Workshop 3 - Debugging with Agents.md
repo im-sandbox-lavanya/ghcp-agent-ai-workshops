@@ -7,7 +7,7 @@
 ## Overview
 
 - **Duration:** 2.5 - 3 hours  
-- **Format:** Instructor-led, challenge-based workshop  
+- **Format:** Instructor-led, guided hands-on workshop  
 - **Difficulty:** 🟡 Intermediate to 🔴 Advanced  
 - **Audience:** Developers, Tech Leads, SREs, Support Engineers  
 - **Focus:** Using AI agents to systematically diagnose, debug, and resolve application issues
@@ -202,12 +202,83 @@ Triage → Diagnose → Fix → Validate → Document
 
 **Goal:** Understand and prioritize the errors in the application.
 
-**Participants:**
-- Review error logs and stack traces
-- Use Copilot Chat and CLI to:
-  - Categorize errors by type and severity
-  - Identify patterns across failures
-  - Prioritize investigation order
+---
+
+#### 📖 Step-by-Step Walkthrough
+
+**Step 1: Review the error logs** (3 min)
+```
+Open these files:
+- logs/error-logs.txt
+- logs/stack-traces.md
+- logs/reproduction-steps.md
+```
+
+**Step 2: Categorize errors using Copilot CLI** (5 min)
+
+In terminal, run:
+
+```bash
+gh copilot explain "Analyze these errors and categorize them:
+$(cat logs/error-logs.txt)
+
+Categories to use:
+- Runtime errors (null refs, type errors)
+- Logic errors (wrong output, incorrect flow)
+- Integration errors (API, database, external)
+- Configuration errors (missing config, wrong env)"
+```
+
+**Step 3: Assign severity using Copilot Chat** (5 min)
+
+Open Copilot Chat and use this prompt:
+
+```
+For each error in @error-logs.txt, assign severity:
+
+| Error | Category | Severity | Impact | Investigation Priority |
+
+Severity criteria:
+- CRITICAL: System down, data loss risk
+- HIGH: Major feature broken, workaround difficult
+- MEDIUM: Feature degraded, workaround exists
+- LOW: Minor issue, cosmetic, edge case
+```
+
+✅ **Expected Output:** A prioritized table of all errors.
+
+**Step 4: Identify error patterns** (5 min)
+
+Use this prompt:
+
+```
+Look for patterns across these errors:
+
+1. Errors that occur together
+2. Errors with similar stack traces
+3. Errors that might share a root cause
+4. Errors that might be causing other errors (cascading)
+
+Group related errors and explain why they might be connected.
+```
+
+**Step 5: Document in error catalog** (2 min)
+- Copy categorized errors to `debugging/error-catalog.md`
+- Note the investigation priority order
+- Highlight suspected root causes
+
+---
+
+#### 💡 Tips & Hints
+
+| Challenge | Hint |
+|-----------|------|
+| 1.1 (4+ categories) | Think: runtime, logic, integration, config, security |
+| 1.2 (severity) | Ask: "What happens if we ignore this for a week?" |
+| 1.3 (patterns) | Look for repeated class names or error codes |
+| 1.4 (cascading) | Error A causes state that triggers Error B |
+
+---
 
 **Artifact Updated:** `debugging/error-catalog.md`
 
@@ -228,11 +299,113 @@ Triage → Diagnose → Fix → Validate → Document
 
 **Goal:** Build a purpose-driven agent for root cause analysis.
 
-**Participants define an agent that:**
-- Analyzes error messages and stack traces
-- Traces execution paths through code
-- Identifies likely root causes
-- Documents evidence and reasoning
+---
+
+#### 📖 Step-by-Step Walkthrough
+
+**Step 1: Create agent file** (2 min)
+```
+Create agents/diagnosis-agent.md with basic structure:
+```
+
+**Step 2: Define agent identity** (5 min)
+
+Add this to your agent file:
+
+```markdown
+# Diagnosis Agent
+
+## Identity
+You are a debugging expert specializing in root cause analysis.
+You think systematically, gather evidence, and never guess.
+
+## Your Approach
+1. Understand the symptom completely first
+2. Form hypotheses based on evidence
+3. Test hypotheses by examining code
+4. Document findings with proof
+5. Rate confidence in your diagnosis
+
+## You Must NOT
+- Jump to conclusions without evidence
+- Suggest fixes before confirming root cause
+- Ignore related errors or warnings
+```
+
+**Step 3: Add diagnosis rules** (8 min)
+
+Use Copilot Chat to generate rules:
+
+```
+Generate diagnosis rules for common bug patterns:
+
+1. NullReferenceException diagnosis steps
+2. Async/await deadlock diagnosis steps  
+3. Race condition diagnosis steps
+4. Memory leak diagnosis steps
+5. Configuration error diagnosis steps
+
+For each, provide:
+- Symptoms to look for
+- Evidence to gather
+- Common causes
+- Verification approach
+```
+
+✅ **Expected Output:** Detailed diagnosis procedures for each bug type.
+
+**Step 4: Add evidence collection instructions** (5 min)
+
+Add to your agent:
+
+```markdown
+## Evidence Collection
+
+For every diagnosis, gather:
+1. ✅ Exact error message and code
+2. ✅ Full stack trace
+3. ✅ Steps to reproduce
+4. ✅ Related log entries (before/after)
+5. ✅ Recent code changes
+6. ✅ Environment details
+
+## Confidence Scoring
+- HIGH (90%+): Have reproduction + root cause in code
+- MEDIUM (70-89%): Strong evidence, need verification
+- LOW (<70%): Hypothesis only, needs more investigation
+```
+
+**Step 5: Add example diagnosis** (5 min)
+
+Add a worked example:
+
+```markdown
+## Example Diagnosis
+
+**Symptom:** "Cannot read property 'id' of undefined"
+
+**Evidence:**
+- Stack trace points to UserService.getProfile()
+- Occurs when user parameter is null
+- Recent change: removed null check in refactoring
+
+**Root Cause:** Null check removed in commit abc123
+
+**Confidence:** HIGH (90%) - can reproduce, see exact line
+```
+
+---
+
+#### 💡 Tips & Hints
+
+| Challenge | Hint |
+|-----------|------|
+| 2.1 (5+ rules) | Think: null, async, race, memory, config |
+| 2.2 (evidence) | "What would convince a skeptic?" |
+| 2.3 (domain patterns) | Add patterns specific to your tech stack |
+| 2.4 (confidence score) | Higher confidence = more evidence |
+
+---
 
 **Agent Defined In:** `agents/diagnosis-agent.md`
 
@@ -253,17 +426,99 @@ Triage → Diagnose → Fix → Validate → Document
 
 **Goal:** Use the diagnosis agent to identify root causes.
 
-**Participants:**
-- Select 2-3 prioritized errors
-- Use the Diagnosis Agent to:
-  - Trace the error source
-  - Identify contributing factors
-  - Document the root cause with evidence
+---
 
-**Techniques Applied:**
-- Stack trace analysis
-- Code path tracing
-- State inspection reasoning
+#### 📖 Step-by-Step Walkthrough
+
+**Step 1: Select errors to investigate** (2 min)
+```
+From your error-catalog.md, select:
+- The highest severity error
+- One error that might be related to another
+- One error that seems unusual
+```
+
+**Step 2: Investigate first error** (10 min)
+
+Open Copilot Chat with your diagnosis agent and error logs:
+
+```
+Using @diagnosis-agent.md approach, diagnose this error:
+
+Error: [paste exact error message]
+Stack trace: [paste stack trace]
+
+Follow these steps:
+1. What is the immediate cause (what failed)?
+2. Trace back - why did that value/state exist?
+3. What code path led to this state?
+4. What's the root cause (first thing that went wrong)?
+5. Rate your confidence.
+```
+
+✅ **Expected Output:** Step-by-step diagnosis with evidence and confidence rating.
+
+**Step 3: Find the hidden logic bug** (10 min)
+
+Use this prompt:
+
+```
+Analyze @buggy-app for logic errors that wouldn't show in error logs:
+
+1. Look for incorrect conditionals (off-by-one, wrong operator)
+2. Look for missing edge cases (empty arrays, null inputs)
+3. Look for incorrect calculations
+4. Look for wrong return values
+
+For each suspected bug:
+- Location and line
+- What's wrong
+- What should it be
+- How to verify
+```
+
+**Step 4: Hunt for race condition** (8 min)
+
+Use this prompt:
+
+```
+Analyze the async code in @buggy-app for race conditions:
+
+1. Shared state modified by multiple async operations
+2. Operations that assume order but don't enforce it
+3. Missing locks or synchronization
+4. Callbacks that might fire in unexpected order
+
+Explain the timing scenario that causes the bug.
+```
+
+**Step 5: Document findings** (5 min)
+- Create root cause analysis entry for each bug
+- Include evidence chain
+- Rate confidence
+- Note any remaining unknowns
+
+---
+
+#### 💡 Tips & Hints
+
+| Challenge | Hint |
+|-----------|------|
+| 3.1 (root cause) | Ask "Why?" 5 times to get to the root |
+| 3.2 (evidence chain) | Symptom → Direct cause → Root cause |
+| 3.3 (hidden bug) | Test with edge cases: 0, 1, empty, max |
+| 3.4 (race condition) | Draw the timeline of concurrent operations |
+| 3.5 (security vuln) | Look for: input not validated, SQL strings, auth gaps |
+
+---
+
+#### ⚠️ Common Pitfalls
+
+- ❌ **Fixing symptoms:** Found where it fails, not why
+- ❌ **Confirmation bias:** Seeing what you expect, not what's there
+- ❌ **Incomplete trace:** Stopping before the real root cause
+
+---
 
 **Artifact Updated:** `debugging/root-cause-analysis.md`
 
@@ -284,6 +539,82 @@ Triage → Diagnose → Fix → Validate → Document
 ### 5. Lab 4: Generate and Apply Fixes ⏱️ _30 minutes_
 
 **Goal:** Create targeted fixes using the Fix Agent.
+
+---
+
+#### 📖 Step-by-Step Walkthrough
+
+**Step 1: Review root causes** (2 min)
+```
+Open debugging/root-cause-analysis.md
+Prioritize fixes by:
+- Severity of the bug
+- Confidence in diagnosis
+- Risk of the fix
+```
+
+**Step 2: Generate fix for critical bug** (10 min)
+
+Open Copilot Chat with your analysis:
+
+```
+Generate a fix for this bug:
+
+Root Cause: [your documented root cause]
+Location: [file and line]
+
+Requirements for the fix:
+1. Minimal change - only fix the bug
+2. No unrelated refactoring
+3. Preserve existing behavior for non-buggy cases
+4. Add defensive checks to prevent recurrence
+
+Provide:
+- The exact code change
+- Explanation of why this fixes it
+- Any risks or side effects
+```
+
+✅ **Expected Output:** Targeted fix with explanation.
+
+**Step 3: Generate fixes for remaining bugs** (10 min)
+
+Use similar prompts for other identified bugs:
+
+```
+For each remaining bug, generate:
+1. Minimal fix code
+2. Test case that proves it's fixed
+3. Defensive change to prevent recurrence
+```
+
+**Step 4: Apply fixes carefully** (5 min)
+
+For each fix:
+```
+1. Apply the fix to buggy-app/src/
+2. If possible, run existing tests
+3. Note any concerns for review
+```
+
+**Step 5: Document fixes** (3 min)
+- Update `debugging/fix-validation.md`
+- Note which bugs are fixed
+- Note any remaining concerns
+
+---
+
+#### 💡 Tips & Hints
+
+| Challenge | Hint |
+|-----------|------|
+| 4.1 (minimal fix) | Count lines changed - fewer is better |
+| 4.2 (document why) | Future you will thank present you |
+| 4.3 (fix all bugs) | Do them one at a time, test between |
+| 4.4 (defensive fix) | Add validation, add logging, add tests |
+| 4.5 (refactor pattern) | Only after all bugs are fixed |
+
+---
 
 **Participants:**
 - Use the Fix Agent to:
@@ -315,11 +646,97 @@ Triage → Diagnose → Fix → Validate → Document
 
 **Goal:** Ensure fixes resolve issues without introducing regressions.
 
-**Participants:**
-- Use the Validation Agent to:
-  - Verify the error is resolved
-  - Check for regressions in related functionality
-  - Suggest additional test coverage
+---
+
+#### 📖 Step-by-Step Walkthrough
+
+**Step 1: List all fixes to validate** (2 min)
+```
+Create a validation checklist from your fixes:
+- Bug fixed
+- Location of fix
+- Expected behavior after fix
+- How to test
+```
+
+**Step 2: Verify each fix** (8 min)
+
+Open Copilot Chat with your fixed code:
+
+```
+Verify this fix is correct:
+
+Original bug: [description]
+Root cause: [from your analysis]
+Fix applied: [the code change]
+
+Check:
+1. Does this fix address the root cause?
+2. Will the original error still occur?
+3. Are there edge cases this doesn't handle?
+4. Could this fix cause any new issues?
+```
+
+✅ **Expected Output:** Validation verdict with reasoning for each fix.
+
+**Step 3: Identify regression risks** (5 min)
+
+Use this prompt:
+
+```
+For the fix in @[fixed-file]:
+
+Identify regression risks:
+1. What other code calls this function?
+2. What relies on the previous behavior?
+3. What edge cases should be tested?
+4. What integration points might be affected?
+
+List the top 5 areas to check for regressions.
+```
+
+**Step 4: Generate regression tests** (3 min)
+
+Use this prompt:
+
+```
+Generate regression test cases for this fix:
+
+Bug: [description]
+Fix: [the change]
+
+For each test, provide:
+- Test name
+- Input/scenario
+- Expected result
+- Why this test is important
+```
+
+**Step 5: Document validation results** (2 min)
+- Update `debugging/fix-validation.md`
+- Note validation status for each fix
+- List any remaining concerns
+
+---
+
+#### 💡 Tips & Hints
+
+| Challenge | Hint |
+|-----------|------|
+| 5.1 (verify fixes) | Walk through the fix with specific inputs |
+| 5.2 (regression areas) | Check callers, related features, edge cases |
+| 5.3 (regression tests) | Test the fix + test it doesn't break related code |
+| 5.4 (automation) | Script that runs tests and checks error logs |
+
+---
+
+#### ⚠️ Common Pitfalls
+
+- ❌ **Trusting the fix without verification:** Always test with real scenarios
+- ❌ **Missing edge cases:** The fix works for main case but fails on edges
+- ❌ **Not checking related code:** Fix in module A breaks module B
+
+---
 
 **Artifact Updated:** `debugging/fix-validation.md`
 
