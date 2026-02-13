@@ -8,6 +8,28 @@
 
 ---
 
+## Table of Contents
+
+1. [Workshop Purpose](#1-workshop-purpose)
+2. [Design Principles](#2-design-principles)
+3. [Scope Decisions (Intentional)](#3-scope-decisions-intentional)
+4. [Pre-Provisioned Repository](#4-pre-provisioned-repository)
+5. [Agent Strategy for Spec-Driven Development](#5-agent-strategy-for-spec-driven-development)
+6. [Prompting Approach](#6-prompting-approach)
+7. [Agenda & Flow (2.5 - 3 Hours)](#7-agenda--flow-25---3-hours)
+   - [Introduction: Copilot as an Agent](#1-introduction-copilot-as-an-agent-️-10-minutes)
+   - [Lab 1: Specification with Agents](#2-lab-1-specification-with-agents-️-25-minutes)
+   - [Lab 2: Planning from the Specification](#3-lab-2-planning-from-the-specification-️-25-minutes)
+   - [Lab 3: Design with Validation](#4-lab-3-design-with-validation-️-30-minutes)
+   - [Lab 4: Implementation with Copilot Agents](#5-lab-4-implementation-with-copilot-agents-️-35-minutes)
+   - [Lab 5: Validation and Alignment Review](#6-lab-5-validation-and-alignment-review-️-15-minutes)
+8. [MCP Context Model (Conceptual)](#8-mcp-context-model-conceptual)
+9. [Success Criteria](#9-success-criteria)
+10. [Scoring & Achievement Levels](#10-scoring--achievement-levels)
+11. [Appendix: Starter Prompts](#appendix-starter-prompts)
+
+---
+
 ## 1. Workshop Purpose
 
 This workshop demonstrates a practical approach to using **GitHub Copilot beyond code completion**, by applying it across the full software development lifecycle.

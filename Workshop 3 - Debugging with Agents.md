@@ -14,6 +14,130 @@
 
 ---
 
+## Table of Contents
+
+1. [Workshop Purpose](#1-workshop-purpose)  
+   *Transforming debugging from ad-hoc investigation to structured, repeatable process using AI agents for error pattern analysis, root cause identification, and targeted fixes*
+
+2. [Design Principles](#2-design-principles)  
+   *Core principles: Root cause before fix, structured investigation over guesswork, custom agents for domain-specific debugging, evidence-based diagnosis, minimal targeted changes, reproducibility*
+
+3. [Scope Decisions (Intentional)](#3-scope-decisions-intentional)  
+   *What's included: Copilot Chat, Copilot CLI, custom debugging agents, MCP concepts, structured error analysis. What's excluded: Full SDK orchestration, production monitoring, infrastructure debugging, performance profiling*
+
+4. [Pre-Provisioned Repository](#4-pre-provisioned-repository)  
+   *Repository with buggy-app/, debugging/, logs/, agents/ (triage, diagnosis, fix, validation), and prompts/ folders containing intentional bugs*
+
+5. [Agent Strategy for Debugging](#5-agent-strategy-for-debugging)  
+   *Four distinct agent roles: Triage Agent (categorizes/prioritizes), Diagnosis Agent (root cause analysis), Fix Agent (generates targeted fixes), Validation Agent (checks regressions)*
+
+6. [Copilot CLI Integration](#6-copilot-cli-integration)  
+   *Terminal-based debugging with `gh copilot explain` and `gh copilot suggest`. When to use CLI vs Chat for quick explanations, log analysis, vs interactive investigation*
+
+7. [Agenda & Flow (2.5 - 3 Hours)](#7-agenda--flow-25---3-hours)  
+   *Complete workflow: Triage → Diagnose → Fix → Validate → Document*
+   
+   - **[Introduction: Why Debugging Needs Agents](#1-introduction-why-debugging-needs-agents-️-10-minutes)** _(10 min)_  
+     - Conceptual overview - no Copilot usage
+     - Why traditional debugging fails (jumping to conclusions, fixing symptoms, knowledge loss)
+     - How agents provide systematic analysis, evidence-based diagnosis, documented trails
+   
+   - **[Lab 1: Triage and Categorize Errors](#2-lab-1-triage-and-categorize-errors-️-20-minutes)** _(20 min)_  
+     - **Mode:** Copilot CLI + Copilot Chat with log files
+     - **Features Used:**
+       - **CLI:** `gh copilot explain` with piped log files for batch error analysis
+       - **Chat:** File reference (`@error-logs.txt`) for structured categorization
+       - Multi-turn conversations for pattern identification
+     - **Activities:**
+       - Review error logs and stack traces
+       - Categorize errors (runtime, logic, integration, configuration)
+       - Assign severity levels (CRITICAL/HIGH/MEDIUM/LOW)
+       - Identify error patterns and cascading failures
+       - Document in error catalog with investigation priorities
+     - **Challenges:** 4+ error categories, assign severity, identify 2+ patterns, predict cascading failures
+   
+   - **[Lab 2: Create a Custom Diagnosis Agent](#3-lab-2-create-a-custom-diagnosis-agent-️-25-minutes)** _(25 min)_  
+     - **Mode:** Agent definition creation (instruction-based, not SDK)
+     - **Features Used:**
+       - Copilot Chat for generating diagnosis rules and procedures
+       - Manual markdown file creation (`agents/diagnosis-agent.md`)
+       - Template-driven agent specification with examples
+     - **Activities:**
+       - Define agent identity (systematic thinker, evidence-based)
+       - Add diagnosis rules (NullReference, async deadlock, race conditions, memory leaks, config errors)
+       - Create evidence collection checklist (error message, stack trace, reproduction steps, logs, changes)
+       - Add confidence scoring system (HIGH/MEDIUM/LOW)
+       - Include worked diagnosis examples
+     - **Challenges:** 5+ diagnosis rules, evidence collection instructions, domain-specific patterns, confidence scoring
+   
+   - **[Lab 3: Investigate Root Causes](#4-lab-3-investigate-root-causes-️-35-minutes)** _(35 min)_  
+     - **Mode:** Custom Diagnosis Agent via Copilot Chat with multi-file context
+     - **Features Used:**
+       - File reference (`@diagnosis-agent.md` + `@buggy-app`) for agent-guided investigation
+       - Code analysis across multiple files
+       - Step-by-step reasoning with evidence chain
+       - Stack trace analysis
+     - **Activities:**
+       - Select highest-severity errors for investigation
+       - Apply diagnosis agent approach (symptom → direct cause → root cause)
+       - Find hidden logic bugs (incorrect conditionals, edge cases, calculations)
+       - Hunt for race conditions in async code (shared state, timing issues)
+       - Document root cause analysis with evidence and confidence ratings
+     - **Challenges:** Identify root cause for high-severity error, document evidence chain, find hidden logic bug, identify race condition, discover security vulnerability
+   
+   - **[Lab 4: Generate and Apply Fixes](#5-lab-4-generate-and-apply-fixes-️-30-minutes)** _(30 min)_  
+     - **Mode:** Custom Fix Agent via Copilot Chat with code context
+     - **Features Used:**
+       - File reference (`@root-cause-analysis.md` + code files) for fix generation
+       - Code generation with explanation
+       - Minimal change principle enforcement
+       - Risk assessment
+     - **Activities:**
+       - Review and prioritize root causes for fixing
+       - Generate minimal, targeted fixes for critical bugs
+       - Generate test cases to prove fixes work
+       - Add defensive checks to prevent recurrence
+       - Apply fixes to buggy-app/src/
+       - Document fixes with reasoning
+     - **Challenges:** Fix highest-severity bug, document minimal/targeted approach, fix all identified bugs (3+), propose defensive fixes, refactor problematic patterns
+   
+   - **[Lab 5: Validate Fixes and Check Regressions](#6-lab-5-validate-fixes-and-check-regressions-️-20-minutes)** _(20 min)_  
+     - **Mode:** Custom Validation Agent via Copilot Chat with comparison context
+     - **Features Used:**
+       - File reference (`@fixed-files`) for validation analysis
+       - Multi-file impact analysis
+       - Regression risk identification
+       - Test generation for edge cases
+     - **Activities:**
+       - Create validation checklist for all fixes
+       - Verify each fix addresses root cause
+       - Identify regression risks (callers, edge cases, integration points)
+       - Generate regression test cases
+       - Document validation results and remaining concerns
+     - **Challenges:** Verify all fixes, identify 2+ regression areas, write regression tests, create automated validation script
+   
+   - **[Wrap-Up: Building a Debugging Playbook](#7-wrap-up-building-a-debugging-playbook-️-10-minutes)** _(10 min)_  
+     - Discussion on institutionalizing agent-driven debugging
+     - Building team debugging playbooks
+     - Integrating with incident response workflows
+
+8. [CLI Quick Reference](#8-cli-quick-reference)  
+   *Command examples: `gh copilot explain`, log analysis with pipes, fix suggestions, code explanation with `-f` flag*
+
+9. [MCP Context Model (Conceptual)](#9-mcp-context-model-conceptual)  
+   *Shared context: Error Catalog (patterns), Code Architecture (structure), Investigation History (sessions), Fix Patterns (solutions), Test Coverage (validation). Captured in markdown artifacts*
+
+10. [Success Criteria](#10-success-criteria)  
+    *Workshop completion checklist: triaged errors, created diagnosis agent, identified root causes with evidence, applied targeted fixes, validated fixes, understood debugging playbooks*
+
+11. [Scoring & Achievement Levels](#11-scoring--achievement-levels)  
+    *360 total points (100 core, 135 challenge, 125 bonus). Achievement levels: 🥇 Debug Master (300+), 🥈 Root Cause Hunter (215-299), 🥉 Bug Fixer (130-214). Time bonuses available*
+
+12. [Appendix: Starter Prompts](#appendix-starter-prompts)  
+    *Ready-to-use prompts for: Triage (categorize/prioritize), Diagnosis (root cause with evidence), Fix Generation (minimal targeted changes), Validation (verify no regressions)*
+
+---
+
 ## 1. Workshop Purpose
 
 This workshop demonstrates how **AI agents can transform debugging** from ad-hoc investigation to a **structured, repeatable process**.

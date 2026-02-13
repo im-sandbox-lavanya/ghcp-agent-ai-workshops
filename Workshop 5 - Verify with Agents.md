@@ -14,6 +14,146 @@
 
 ---
 
+## Table of Contents
+
+1. [Workshop Purpose](#1-workshop-purpose)  
+   *How AI agents elevate verification from checklist-driven reviews to intelligent, context-aware analysis for security vulnerabilities, structured code reviews, and actionable remediation*
+
+2. [Design Principles](#2-design-principles)  
+   *Core principles: Security as first-class concern, context-aware review over generic rules, custom agents for domain-specific verification, actionable findings over noise, remediation guidance, continuous verification*
+
+3. [Scope Decisions (Intentional)](#3-scope-decisions-intentional)  
+   *What's included: Copilot Chat, Copilot CLI, custom security/review agents, MCP concepts, structured verification artifacts. What's excluded: Full SAST/DAST tools, compliance deep-dives, penetration testing, infrastructure security*
+
+4. [Pre-Provisioned Repository](#4-pre-provisioned-repository)  
+   *Repository with target-app/ (intentional security vulnerabilities), verification/, security/, agents/ (security-scanner, code-review, remediation, verification), and prompts/ folders*
+
+5. [Agent Strategy for Verification](#5-agent-strategy-for-verification)  
+   *Four distinct agent roles: Security Scanner Agent (identifies vulnerabilities), Code Review Agent (consistent criteria), Remediation Agent (fix recommendations), Verification Agent (validates completeness)*
+
+6. [Copilot CLI Integration](#6-copilot-cli-integration)  
+   *Terminal-based security checks with `gh copilot explain` and `gh copilot suggest`. When to use CLI vs Chat for quick checks, single-file review vs multi-file analysis, threat modeling*
+
+7. [Agenda & Flow (2.5 - 3 Hours)](#7-agenda--flow-25---3-hours)  
+   *Complete workflow: Scope → Scan → Review → Remediate → Verify*
+   
+   - **[Introduction: Why Verification Needs Agents](#1-introduction-why-verification-needs-agents-️-10-minutes)** _(10 min)_  
+     - Conceptual overview - no Copilot usage
+     - Why traditional security reviews fail (inconsistent criteria, missed vulnerabilities, generic findings, vague remediation)
+     - How agents provide systematic analysis, context-aware detection, actionable guidance, documented trails
+   
+   - **[Lab 1: Define Verification Scope](#2-lab-1-define-verification-scope-️-20-minutes)** _(20 min)_  
+     - **Mode:** Standard Copilot Chat with application context
+     - **Features Used:**
+       - File reference (`@target-app`) for architecture analysis
+       - Multi-turn conversations for threat modeling
+       - Structured output for risk assessment
+     - **Activities:**
+       - Review application architecture (entry points, data flows, critical components)
+       - Identify high-risk areas (auth, data I/O, database ops, APIs, admin functions)
+       - Create STRIDE threat model (Spoofing, Tampering, Repudiation, Information Disclosure, DoS, Elevation of Privilege)
+       - Map trust boundaries (user → app, app → DB, app → APIs, admin vs user)
+       - Document scope in security-scope.md with priorities
+     - **Challenges:** 5+ high-risk components, threat model diagram, map data flows/trust boundaries, identify attack vectors
+   
+   - **[Lab 2: Create a Custom Security Scanner Agent](#3-lab-2-create-a-custom-security-scanner-agent-️-25-minutes)** _(25 min)_  
+     - **Mode:** Agent definition creation (instruction-based, not SDK)
+     - **Features Used:**
+       - Copilot Chat for generating OWASP detection rules
+       - Manual markdown file creation (`agents/security-scanner-agent.md`)
+       - Security pattern templates with severity classification
+     - **Activities:**
+       - Define agent identity (systematic scanner, assume inputs malicious, document everything)
+       - Add OWASP Top 10 detection rules (Injection, Broken Auth, Data Exposure, Access Control, Misconfiguration)
+       - Add severity classification (CRITICAL/HIGH/MEDIUM/LOW with criteria)
+       - Define finding format (severity, location, description, evidence, impact, fix)
+       - Add false positive filtering (reachability check, validation elsewhere, test code detection)
+     - **Challenges:** 5+ OWASP detection rules, severity criteria, false positive filtering, CWE/CVE compliance mapping
+   
+   - **[Lab 3: Perform Security Analysis](#4-lab-3-perform-security-analysis-️-35-minutes)** _(35 min)_  
+     - **Mode:** Custom Security Scanner Agent + Copilot CLI
+     - **Features Used:**
+       - File reference (`@security-scanner-agent.md` + `@target-app`) for agent-guided scanning
+       - **CLI:** `gh copilot explain` with piped config files for quick checks
+       - Pattern detection for OWASP vulnerabilities
+       - Evidence extraction from code
+     - **Activities:**
+       - Analyze authentication (SQL injection, weak passwords, session management, token vulnerabilities, rate limiting)
+       - Check input validation (SQL injection, command injection, XSS, path traversal, LDAP/XML injection)
+       - Find data exposure (passwords in logs, data in URLs, excessive API responses, hardcoded secrets, insecure storage)
+       - Check configurations (debug mode, default credentials, CORS, security headers)
+       - Document findings with severity, location, and evidence
+     - **Challenges:** 3+ injection vulnerabilities, auth/authorization flaws, sensitive data exposure, security misconfiguration, business logic vulnerability
+   
+   - **[Lab 4: Structured Code Review](#5-lab-4-structured-code-review-️-25-minutes)** _(25 min)_  
+     - **Mode:** Custom Code Review Agent via Copilot Chat + CLI
+     - **Features Used:**
+       - File reference (`@target-app`) for multi-dimensional review
+       - Pattern search for error handling and logging issues
+       - **CLI:** `gh copilot explain` for dependency vulnerability checks
+       - Structured checklist generation
+     - **Activities:**
+       - Create review checklist (component, files, date)
+       - Review error handling (silent catches, stack trace exposure, logging context, global handler, DB error exposure)
+       - Review logging practices (passwords, tokens, PII, financial data, secrets in logs; security events logged?)
+       - Check input validation (server-side, all APIs, centralized, error messages, whitelist vs blacklist)
+       - Check dependencies for known CVEs
+       - Complete security review checklist
+     - **Challenges:** Complete checklist for 3+ components, identify error handling leaks, find logging exposing sensitive data, vulnerable dependencies with CVE references
+   
+   - **[Lab 5: Generate Remediation Plan](#6-lab-5-generate-remediation-plan-️-25-minutes)** _(25 min)_  
+     - **Mode:** Custom Remediation Agent via Copilot Chat
+     - **Features Used:**
+       - File reference (`@findings.md`) for prioritization
+       - Secure code generation with explanations
+       - Pattern library creation
+       - Risk/effort matrix generation
+     - **Activities:**
+       - Prioritize findings by severity and effort (Critical + Low Effort = Fix Immediately, etc.)
+       - Generate secure fix for critical vulnerability (secure code, explanation, hardening, tests)
+       - Generate fixes for all findings (minimal changes, secure patterns, related areas, verification)
+       - Create secure patterns library (SQL, auth, input validation, logging, error handling)
+       - Document remediation plan with priorities and owners
+     - **Challenges:** Secure fix for critical vuln, risk/effort prioritization matrix, implement auth fix, create reusable secure patterns library
+   
+   - **[Lab 6: Verification and Sign-Off](#7-lab-6-verification-and-sign-off-️-15-minutes)** _(15 min)_  
+     - **Mode:** Custom Verification Agent via Copilot Chat
+     - **Features Used:**
+       - Fix validation analysis
+       - Regression risk detection
+       - Before/after comparison generation
+       - Evidence documentation
+     - **Activities:**
+       - Create verification checklist (finding ID, original issue, fix applied, status)
+       - Verify critical fixes (addresses root cause, secure code, edge cases, new vulnerabilities, follows patterns)
+       - Check for regressions (functionality, performance, dependencies, tests)
+       - Create before/after security comparison table
+       - Document verification evidence
+     - **Challenges:** Verify all critical findings, create before/after comparison, generate security regression test suite
+
+8. [CLI Quick Reference](#8-cli-quick-reference)  
+   *Command examples: Security analysis with piped files, secure pattern suggestions, configuration review with `-f` flag, dependency checks with jq*
+
+9. [MCP Context Model (Conceptual)](#9-mcp-context-model-conceptual)  
+   *Shared context: Threat Model (attack vectors), Security Policies (requirements), Secure Patterns (approved implementations), Finding History (previous vulnerabilities), Compliance Requirements (regulations). Captured in markdown artifacts*
+
+10. [OWASP Top 10 Reference](#10-owasp-top-10-reference)  
+    *Agent checks mapped to OWASP Top 10: Injection, Broken Authentication, Sensitive Data Exposure, XXE, Broken Access Control, Security Misconfiguration, XSS, Insecure Deserialization, Known Vulnerabilities, Insufficient Logging*
+
+11. [Success Criteria](#11-success-criteria)  
+    *Workshop completion checklist: defined verification scope, created security scanner agent, identified vulnerabilities with categorization, performed structured code review, generated remediation guidance, understood verification/sign-off*
+
+12. [Scoring & Achievement Levels](#12-scoring--achievement-levels)  
+    *375 total points (100 core, 125 challenge, 150 bonus). Achievement levels: 🥇 Security Champion (315+), 🥈 Vulnerability Hunter (225-314), 🥉 Security Reviewer (135-224). Time bonuses available*
+
+13. [Appendix: Starter Prompts](#appendix-starter-prompts)  
+    *Ready-to-use prompts for: Security Scope (risk assessment), Vulnerability Scan (OWASP checks with severity), Code Review (best practices evaluation), Remediation (secure alternatives), Verification (fix validation)*
+
+14. [Appendix: Security Review Checklist](#appendix-security-review-checklist)  
+    *Comprehensive checklist covering: Authentication (password hashing, sessions, MFA, lockout), Authorization (server-side enforcement, least privilege, direct object refs), Input Validation (sanitization, parameterized queries, output encoding), Data Protection (encryption, TLS, no sensitive logs), Error Handling (no sensitive info exposure, graceful failures, security event logging)*
+
+---
+
 ## 1. Workshop Purpose
 
 This workshop demonstrates how **AI agents can elevate verification activities** from checklist-driven reviews to **intelligent, context-aware analysis**.

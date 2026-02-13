@@ -14,6 +14,123 @@
 
 ---
 
+## Table of Contents
+
+1. [Workshop Purpose](#1-workshop-purpose)  
+   *How AI agents transform testing from code generation to understanding behavior, deriving meaningful scenarios, generating maintainable Playwright tests, and reducing brittle automation*
+
+2. [Design Principles](#2-design-principles)  
+   *Core principles: Test intent before test code, agents assist testers (not replace judgment), fewer meaningful tests over exhaustive scripts, maintainability over one-off generation*
+
+3. [Scope Decisions (Intentional)](#3-scope-decisions-intentional)  
+   *What's included: Copilot Chat, custom Playwright agents, structured test artifacts, MCP concepts. What's excluded: Copilot CLI (low value for UI testing), SDK orchestration, full Playwright walkthroughs*
+
+4. [Pre-Provisioned Repository](#4-pre-provisioned-repository)  
+   *Repository with app-under-test/, testing/, playwright/ (tests, config), agents/ (test-design, playwright, review), and prompts/ folders*
+
+5. [Agent Strategy for Testing](#5-agent-strategy-for-testing)  
+   *Three distinct agent roles: Test Design Agent (understands behavior, identifies scenarios), Playwright Agent (generates tests with patterns), Review Agent (evaluates quality, identifies flakiness)*
+
+6. [Agenda & Flow (2.5 - 3 Hours)](#6-agenda--flow-25---3-hours)  
+   *Complete workflow: Understand → Decide → Generate → Review → Improve*
+   
+   - **[Introduction: Why Testing Needs Agents](#1-introduction-why-testing-needs-agents-️-10-minutes)** _(10 min)_  
+     - Conceptual overview - no Copilot usage
+     - Why test automation fails (brittle tests, poor coverage decisions, high maintenance)
+     - How agents make intent explicit, improve quality, reduce noise
+   
+   - **[Lab 1: Understand the Application](#2-lab-1-understand-the-application-️-20-minutes)** _(20 min)_  
+     - **Mode:** Standard Copilot Chat with application context
+     - **Features Used:**
+       - File reference (`@app-under-test`) for application analysis
+       - Multi-turn conversations for journey identification
+       - Structured output for risk assessment
+     - **Activities:**
+       - Explore application and identify main features
+       - Identify critical user journeys (what users MUST do)
+       - Assess testing risk (complexity, data sensitivity, dependencies)
+       - Create test scope (MUST/SHOULD/COULD/WON'T test)
+       - Document in test-scope.md with risk-based priorities
+     - **Challenges:** 5+ critical journeys, categorize flows, identify 3+ high-risk areas, create priority matrix
+   
+   - **[Lab 2: Generate Test Scenarios with an Agent](#3-lab-2-generate-test-scenarios-with-an-agent-️-25-minutes)** _(25 min)_  
+     - **Mode:** Standard Copilot Chat for scenario generation
+     - **Features Used:**
+       - Gherkin-style scenario generation (Given-When-Then)
+       - Context-aware scenario variations
+       - Edge case identification
+     - **Activities:**
+       - Select highest priority journey from test scope
+       - Generate happy path scenarios (main success, variations, user types)
+       - Generate negative/error scenarios (invalid input, unauthorized access, timeouts, conflicts)
+       - Identify boundary conditions (min/max, empty/null, special chars, pagination edges)
+       - Document all scenarios in scenarios.md with priorities
+     - **Challenges:** 3+ happy path scenarios, 3+ negative scenarios, boundary conditions, data-driven variations, cross-browser/device matrix
+   
+   - **[Lab 3: Create a Custom Playwright Agent](#4-lab-3-create-a-custom-playwright-agent-️-30-minutes)** _(30 min)_  
+     - **Mode:** Agent definition creation (instruction-based, not SDK)
+     - **Features Used:**
+       - Copilot Chat for generating test patterns and conventions
+       - Manual markdown file creation (`agents/playwright-agent.md`)
+       - Code example generation with anti-patterns
+     - **Activities:**
+       - Define agent identity (reliability > speed, readability > cleverness)
+       - Define selector strategy (data-testid > ARIA roles > text > CSS, with priorities)
+       - Add waiting patterns (explicit waits, no arbitrary delays)
+       - Add test structure patterns (Page Object Model, fixtures, isolation, setup/teardown)
+       - Add conventions (file naming, test naming, assertion patterns)
+     - **Challenges:** Define selector strategy, include anti-patterns, error handling/retry, page object model, reusable action library
+   
+   - **[Lab 4: Generate Playwright Tests](#5-lab-4-generate-playwright-tests-️-35-minutes)** _(35 min)_  
+     - **Mode:** Custom Playwright Agent via Copilot Chat with multi-file context
+     - **Features Used:**
+       - File reference (`@playwright-agent.md` + `@scenarios.md`) for convention-based generation
+       - Code generation following agent rules
+       - Test parameterization patterns
+       - Multi-step test generation with assertions
+     - **Activities:**
+       - Review scenarios and agent conventions
+       - Generate first happy path test (selector strategy, waiting patterns, assertions)
+       - Generate negative/error test (setup error condition, assert handling)
+       - Add comprehensive assertions (page load, form state, API response, UI feedback, final state)
+       - Create parameterized/data-driven tests
+       - Save tests to playwright/tests/ by feature
+     - **Challenges:** Generate working happy path test, generate error scenario test, multiple assertions, parameterized test, visual regression test
+   
+   - **[Lab 5: Review and Improve Tests](#6-lab-5-review-and-improve-tests-️-20-minutes)** _(20 min)_  
+     - **Mode:** Custom Review Agent via Copilot Chat with test analysis
+     - **Features Used:**
+       - File reference (`@scenarios.md` vs `@playwright/tests/`) for coverage analysis
+       - Pattern detection for flakiness (arbitrary waits, unreliable selectors)
+       - Code refactoring suggestions
+       - Test enhancement recommendations
+     - **Activities:**
+       - Create coverage matrix (scenarios vs tests, identify gaps)
+       - Review tests for flakiness risks (waitForTimeout, dynamic selectors, race conditions, state leakage)
+       - Fix identified flaky patterns
+       - Add retry and error handling (retry logic, screenshots, cleanup, meaningful errors)
+       - Document coverage gaps
+     - **Challenges:** Create coverage matrix, fix 2+ flaky patterns, add retry logic, implement custom test reporter
+   
+   - **[Wrap-Up: Building a Testing Playbook](#7-wrap-up-building-a-testing-playbook-️-10-minutes)** _(10 min)_  
+     - Discussion on institutionalizing agent-driven testing
+     - Building team testing playbooks
+     - CI/CD integration strategies
+
+7. [MCP Context Model (Conceptual)](#7-mcp-context-model-conceptual)  
+   *Shared context: Application Behavior (what app does), Test Scope (what matters), Scenarios (expected behaviors), Selector Patterns (UI targeting), Conventions (naming/structure). Captured in markdown artifacts*
+
+8. [Success Criteria](#8-success-criteria)  
+   *Workshop completion checklist: identified critical journeys, generated structured scenarios, created custom Playwright agent, generated maintainable tests, reviewed quality/coverage, understood intent-first methodology*
+
+9. [Scoring & Achievement Levels](#9-scoring--achievement-levels)  
+   *335 total points (95 core, 125 challenge, 115 bonus). Achievement levels: 🥇 Test Architect (280+), 🥈 Quality Champion (200-279), 🥉 Test Builder (120-199). Time bonuses available*
+
+10. [Appendix: Starter Prompts](#appendix-starter-prompts)  
+    *Ready-to-use prompts for: Test Scope (critical journeys/risks), Scenario Generation (Given-When-Then), Playwright Agent Definition (patterns/conventions), Test Generation (convention-based), Test Review (coverage/quality)*
+
+---
+
 ## 1. Workshop Purpose
 
 This workshop shows how **AI agents can be applied to testing**, not just to generate test code, but to:

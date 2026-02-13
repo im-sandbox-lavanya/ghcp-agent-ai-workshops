@@ -14,6 +14,117 @@
 
 ---
 
+## Table of Contents
+
+1. [Workshop Purpose](#1-workshop-purpose)  
+   *Understanding how custom AI agents enable systematic analysis, migration, and modernization of legacy .NET and Java applications through repeatable workflows*
+
+2. [Design Principles](#2-design-principles)  
+   *Core principles: Modernization before migration, custom agents over generic prompting, incremental change, explicit constraints, and enterprise-safe patterns*
+
+3. [Scope Decisions (Intentional)](#3-scope-decisions-intentional)  
+   *What's included: Copilot Chat, custom agents, structured artifacts, .NET Framework → .NET 8+ and Java 8 → Java 17+ patterns. What's excluded: Full migration tooling, database migration, infrastructure modernization*
+
+4. [Pre-Provisioned Repository](#4-pre-provisioned-repository)  
+   *Repository structure with legacy-app/, modernization/, agents/, src-modernized/, and prompts/ folders for guided hands-on experience*
+
+5. [Agent Strategy for Modernization](#5-agent-strategy-for-modernization)  
+   *Three distinct agent roles: Analysis Agent (identifies technical debt), Modernization Agent (applies transformations), and Review Agent (validates changes)*
+
+6. [Agenda & Flow (2.5 - 3 Hours)](#6-agenda--flow-25---3-hours)  
+   *Complete workflow: Analyze → Define Goals → Create Agent → Modernize → Validate*
+   
+   - **[Introduction: Why Modernization Needs Agents](#1-introduction-why-modernization-needs-agents-️-10-minutes)** _(10 min)_  
+     - Conceptual overview - no Copilot usage
+     - Understanding agent-driven modernization workflow
+     - Benefits: consistent rules, explainable changes, incremental safety
+   
+   - **[Lab 1: Understand the Legacy Application](#2-lab-1-understand-the-legacy-application-️-25-minutes)** _(25 min)_  
+     - **Mode:** Standard Copilot Chat with file context
+     - **Features Used:**
+       - File reference (`@filename`) for legacy codebase analysis
+       - Multi-turn conversations for iterative analysis
+       - Structured prompting for architectural smell detection
+     - **Activities:**
+       - Identify architectural smells (God classes, tight coupling, missing abstraction)
+       - Detect deprecated patterns (.NET/Java APIs, authentication, data access)
+       - Create technical debt heatmap with priority levels
+       - Document findings in `modernization/current-state.md`
+     - **Challenges:** 5+ architectural smells, 3+ deprecated APIs, debt heatmap, complexity score
+   
+   - **[Lab 2: Define Modernization Goals & Constraints](#3-lab-2-define-modernization-goals--constraints-️-20-minutes)** _(20 min)_  
+     - **Mode:** Standard Copilot Chat with artifact context
+     - **Features Used:**
+       - File reference (`@current-state.md`) for context-aware planning
+       - Structured query patterns for goal definition
+       - Iterative refinement through follow-up prompts
+     - **Activities:**
+       - Define target state (framework version, architecture style, patterns)
+       - Establish measurable success criteria (performance, quality, security)
+       - Identify constraints (timeline, budget, technical, business)
+       - Create phased modernization roadmap
+     - **Challenges:** 3+ success criteria, 3+ hard constraints, prioritized roadmap, rollback strategy
+   
+   - **[Lab 3: Create a Custom Modernization Agent](#4-lab-3-create-a-custom-modernization-agent-️-30-minutes)** _(30 min)_  
+     - **Mode:** Agent definition creation (instruction-based, not SDK)
+     - **Features Used:**
+       - Copilot Chat for generating agent instructions
+       - Manual markdown file creation (`agents/modernization-agent.md`)
+       - Template-driven agent specification
+     - **Activities:**
+       - Define agent identity and role
+       - Add transformation rules (.NET: async/await, HttpClient, EF Core, appsettings.json; Java: java.time, Spring Boot 3.x, records)
+       - Create self-validation checklist
+       - Add before/after code examples
+     - **Challenges:** 5+ modernization rules, error handling instructions, framework patterns, validation checklist, versioned agent
+   
+   - **[Lab 4: Apply the Agent to Modernize the Application](#5-lab-4-apply-the-agent-to-modernize-the-application-️-40-minutes)** _(40 min)_  
+     - **Mode:** Custom Agent via Copilot Chat with multi-file context
+     - **Features Used:**
+       - File reference (`@modernization-agent.md` + `@LegacyService.cs/java`) for agent-guided transformation
+       - Custom agent instructions for consistent modernization
+       - Code generation with explanations
+       - Before/after comparison views
+     - **Activities:**
+       - Select high-debt components for modernization
+       - Modernize service layer (async/await, deprecated APIs, error handling, DI)
+       - Modernize data access (ADO.NET → EF Core, JDBC → JPA, async operations)
+       - Modernize API layer ([ApiController], validation, error responses, Swagger)
+       - Copy modernized code to `src-modernized/`
+     - **Challenges:** Modernize 2+ services, update deprecated APIs, convert to async, modernize DI, strangler fig pattern
+   
+   - **[Lab 5: Validate & Review with a Secondary Agent](#6-lab-5-validate--review-with-a-secondary-agent-️-20-minutes)** _(20 min)_  
+     - **Mode:** Custom Review Agent via Copilot Chat with comparison context
+     - **Features Used:**
+       - File reference (`@review-agent.md` + legacy + modernized files) for validation
+       - Multi-file comparison analysis
+       - Risk identification and regression detection
+       - Test generation suggestions
+     - **Activities:**
+       - Compare legacy vs modernized code
+       - Validate alignment with goals and constraints
+       - Verify business logic preservation
+       - Identify potential regressions with mitigation plans
+       - Generate validation tests
+     - **Challenges:** Before/after comparison for 3+ components, verify business logic, identify regressions, automated test suite
+
+7. [Technology-Specific Patterns](#7-technology-specific-patterns)  
+   *.NET modernization targets (.NET Framework → .NET 8+, Web Forms → Blazor, WCF → gRPC, EF6 → EF Core). Java modernization targets (Java 8 → 17/21, Spring Boot 2.x → 3.x, JAX-RS → WebFlux, JDBC → R2DBC)*
+
+8. [MCP Context Model (Conceptual)](#8-mcp-context-model-conceptual)  
+   *Shared context elements: Current State (legacy architecture), Target State (desired architecture), Constraints, Modernization Goals, Migration Patterns. Captured in markdown artifacts*
+
+9. [Success Criteria](#9-success-criteria)  
+   *Workshop completion checklist: analyzed legacy app, defined goals/constraints, created custom agent, modernized components, validated changes, understood incremental patterns*
+
+10. [Scoring & Achievement Levels](#10-scoring--achievement-levels)  
+    *325 total points (95 core, 110 challenge, 120 bonus). Achievement levels: 🥇 Modernization Master (275+), 🥈 Transformation Lead (195-274), 🥉 Migration Specialist (115-194). Time bonuses available*
+
+11. [Appendix: Starter Prompts](#appendix-starter-prompts)  
+    *Ready-to-use prompts for: Analysis (identify patterns/debt), Goals Definition (target state/constraints), Modernization Agent (transformation rules), Modernization (apply changes), Validation (verify alignment)*
+
+---
+
 ## 1. Workshop Purpose
 
 This workshop demonstrates how **custom AI agents** can be used to **analyze, migrate, and modernize legacy applications**, with focus on .NET and Java ecosystems.
